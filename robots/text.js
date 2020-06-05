@@ -2,10 +2,26 @@ const algorithmia     = require('algorithmia')
 const algorithmApiKey = require('../credentials/algorithmia.json').apikey
 const sentenceBoundaryDetection = require('sbd')
 
+const watsonApiKey = require('../credentials/watson-nlu.json').apikey
+const NaturalLanguageUnderstandingV1 = require('ibm-watson/natural-language-understanding/v1');
+const  { IamAuthenticator } = require('ibm-watson/auth');
+ 
+const nlu = new NaturalLanguageUnderstandingV1({
+ // authenticator: watsonApiKey,
+  authenticator: new IamAuthenticator({ apikey: watsonApiKey}),
+  //authenticator: new IamAuthenticator({ apikey: '<apikey>' }),
+  version: '2018-04-05',
+  url: 'https://gateway.watsonplatform.net/natural-language-understanding/api/'
+})
+
+
+
 async function robot (content) {
  await fetchContentFromwikipedia(content)
   sanitizeContente(content)
  breakContentIntoSentences(content)
+ limiteMaximumSentences(content)
+ await fetchKeywordsOfAllSentences(content)
 //console.log('Logando funcao "fetchContentFromwikipedia" retona')
 //console.log(fetchContentFromwikipedia())
 
@@ -62,6 +78,51 @@ function sanitizeContente(content){
     })
   })
 }
+
+function limiteMaximumSentences(content) {
+content.sentences = content.sentences.slice(0, content.maximumSentences)
+//content.sentences = content.sentences.slice(0, content.maximumSentences)
+
+}
+
+async function fetchKeywordsOfAllSentences(content) {
+  //console.log('> [text-robot] Starting to fetch keywords from Watson')
+
+  for (const sentence of content.sentences) {
+   // console.log(`> [text-robot] Sentence: "${sentence.text}"`)
+
+    sentence.keywords = await fetchWatsonAndReturnKeywords(sentence.text)
+
+    //console.log(`> [text-robot] Keywords: ${sentence.keywords.join(', ')}\n`)
+  }
+}
+
+async function fetchWatsonAndReturnKeywords(sentence) {
+  return new Promise((resolve, reject) =>{
+    nlu.analyze({
+      text: sentence,
+      features: {
+        keywords: {}
+      }
+    }, (error, response) => {
+      if (error) {
+        reject(error)
+        return
+      }
+
+      const keywords = response.result.keywords.map((keyword) => {
+        return keyword.text
+      })
+
+      resolve(keywords)
+ 
+    //console.log(JSON.stringify(Response, null,4))
+   //process.exit(0)
+        
+   })
+  })
+  
+ }
 
 }
  //console.log (`Recebi com sucesso: ${content.searchTerm}`)
