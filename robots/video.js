@@ -9,20 +9,20 @@ const rootPath = path.resolve(__dirname, '..')
 
 
 async function robot(){
-  //console.log('> [video-robot] Starting...')
+  console.log('> [video-robot] Starting...')
   const content = state.load()
 
 
-//  await convertAllImages(content)
-//  await createSentenceImages(content)
-//  await createYoutubeThumbnail()
+ await convertAllImages(content)
+ await createSentenceImages(content)
+ await createYoutubeThumbnail()
 
-//await createAfterEffectScript(content)
+await createAfterEffectScript(content)
 
 await renderVideoWithAfterEffects()
 
 
-//  state.save(content)
+ state.save(content)
 
  async function convertAllImages(content){
   for(let sentenceIndex = 0; sentenceIndex <content.sentences.length;sentenceIndex++) {
@@ -33,8 +33,8 @@ await renderVideoWithAfterEffects()
 
 async function convertImage(sentenceIndex){
  return new Promise((resolve, reject) =>{
-   const inputFile = `./content/${sentenceIndex}-Original.jpg[0]`
-   const outputFile = `./content/${sentenceIndex}-convertido.jpg`
+   const inputFile = `./content/${sentenceIndex}-original.png[0]`
+   const outputFile = `./content/${sentenceIndex}-converted.png`
    const width = 1920
    const height = 1080
    gm()
@@ -133,7 +133,7 @@ async function createSentenceImage(sentenceIndex, sentenceText) {
 async function createYoutubeThumbnail() {
 return new Promise((resolve, reject) => {
  gm()
- .in('./content/0-convertido.jpg')
+ .in('./content/0-converted.png')
  .write('./content/youtube-thumbnail.jpg', (error) => {
 
    if (error) {
@@ -153,37 +153,6 @@ async function createAfterEffectScript(content) {
 }
 async function renderVideoWithAfterEffects() {
   return new Promise((resolve, reject) => {
-
-   /* const systemPlatform=os.platform
-      
-    if (systemPlatform== 'darwin'){
-      const aerenderFilePath = '/Applications/Adobe After Effects CC 2019/aerender'
-    }else if (systemPlatform=='win32'){
-      const aerenderFilePath = '%Program Files%\Adobe\Adobe After Effects CC 2019\Support Files\aerender.exe'//'%programfiles%\Adobe\Adobe After Effects CC\Arquivos de suporte\aerender.exe'
-      
-    }else{
-      return reject(new Error('System not Supported'))
-    }
-      const templateFilePath = `${rootPath}/templates/1/template.aep`// fromRoot('./templates/1/template.aep')
-      const destinationFilePath = `${rootPath}/content/output.mov`// fromRoot('./content/output.mov')
-
-      console.log('> [video-robot] Starting After Effects')
-
-      const aerender = spawn(aerenderFilePath, [
-        '-comp', 'main',
-        '-project', templateFilePath,
-        '-output', destinationFilePath
-      ])
-
-      aerender.stdout.on('data', (data) => {
-        process.stdout.write(data)
-      })
-
-      aerender.on('close', () => {
-        console.log('> [video-robot] After Effects closed')
-        resolve()
-      })
-    })*/
 
     const aerenderFilePath = 'C:\\Program Files\\Adobe\\Adobe After Effects CC 2019\\Support Files\\aerender.exe'  //'%ProgramFiles%\Adobe\Adobe After Effects CC 2019\Support Files\aerender.exe'//'/Applications/Adobe After Effects CC 2019/aerender'
     const templateFilepath = `${rootPath}/templates/1/template.aep`
